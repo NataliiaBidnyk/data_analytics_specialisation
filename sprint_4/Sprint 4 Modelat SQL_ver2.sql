@@ -138,7 +138,6 @@ CREATE TABLE credit_card_status_history (
     credit_card_id VARCHAR(15) NOT NULL,
     card_status ENUM('Active', 'Inactive') NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    modified_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (credit_card_id) REFERENCES credit_card(id) ON DELETE CASCADE
 );
 
