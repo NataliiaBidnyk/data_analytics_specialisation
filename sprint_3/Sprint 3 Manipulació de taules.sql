@@ -366,7 +366,7 @@ WHERE id = 'CcU-9999';
 INSERT INTO credit_card (id)
 VALUES ('CcU-9999');
 
--- insert new user
+-- insert new TRANSACTION
 INSERT INTO transaction (id, credit_card_id, company_id, user_id, lat, longitude, amount, declined) 
 VALUES ('108B1D1D-5B23-A76C-55EF-C568E49A99DD', 'CcU-9999', 'b-9999', 9999 , 829.999, -117.999, 111.11, 0);
 
@@ -379,6 +379,10 @@ Des de recursos humans et sol·liciten eliminar la columna "pan" de la taula cre
 
 -- show PK and FK from the 'credit_card' table
 SELECT TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
+FROM information_schema.KEY_COLUMN_USAGE
+WHERE TABLE_NAME = 'credit_card';
+
+SELECT *
 FROM information_schema.KEY_COLUMN_USAGE
 WHERE TABLE_NAME = 'credit_card';
 
