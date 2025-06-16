@@ -37,7 +37,7 @@ Show all transactions made from Germany */
 This query verifies that 'Germany' appears only once and is spelled correctly. */
 SELECT DISTINCT country
 FROM company
-WHERE UPPER(country) LIKE '%GER%';
+WHERE country LIKE '%GER%';
 
 -- Select all transactions made from Germany
 SELECT *
@@ -83,6 +83,16 @@ FROM transaction
 -- excluded declined transactions
 WHERE transaction.declined  = 0);
 
+SELECT DISTINCT c.company_name
+FROM company c
+WHERE NOT EXISTS (
+    SELECT t.company_id
+    FROM transaction t
+    WHERE t.company_id = c.id
+      AND t.declined = 0
+);
+
+
 /* Nivell 2
 Exercici 1
 Identifica els cinc dies que es va generar la quantitat més gran d'ingressos a l'empresa per vendes. 
@@ -96,21 +106,21 @@ SELECT DATE(timestamp) as day, SUM(amount) as toatal_sales
 FROM transaction
 -- excluded declined transactions
 WHERE declined = FALSE
-GROUP BY DATE(timestamp)
-ORDER BY SUM(amount) desc
+GROUP BY day
+ORDER BY toatal_sales desc
 LIMIT 5;
 
 /* Exercici 2
 Quina és la mitjana de vendes per país? Presenta els resultats ordenats de major a menor mitjà.
 What is the average sales per country? Present the results ordered from highest to lowest average. */
 
-SELECT country, AVG(amount) AS avg_sales
-FROM company
-INNER JOIN transaction ON company.id = transaction.company_id
+SELECT c.country, ROUND(AVG(t.amount),2) AS avg_sales
+FROM company c
+INNER JOIN transaction t ON c.id = t.company_id
 -- excluded declined transactions
-WHERE transaction.declined  = 0
-GROUP BY country
-ORDER BY AVG(amount) DESC;
+WHERE t.declined  = 0
+GROUP BY c.country
+ORDER BY avg_sales DESC;
 
  /* Exercici 3
 En la teva empresa, es planteja un nou projecte per a llançar algunes campanyes publicitàries per a fer competència a la companyia "Non Institute". 
@@ -163,14 +173,14 @@ with a value between 100 and 200 euros on any of the following dates: April 29, 
 Sort the results in descending order by amount (from highest to lowest)
  */
 
-SELECT company_name, phone, country, timestamp, amount
-FROM company
-INNER JOIN transaction ON company.id = transaction.company_id
-WHERE transaction.amount BETWEEN 100 AND 200
-AND DATE(transaction.timestamp) IN ("2021-04-29", "2021-07-20" , "2022-03-13")
+SELECT c.company_name, c.phone, c.country, t.timestamp, t.amount
+FROM company c
+INNER JOIN transaction t ON c.id = t.company_id
+WHERE t.amount BETWEEN 100 AND 200
+AND DATE(t.timestamp) IN ("2021-04-29", "2021-07-20" , "2022-03-13")
 -- exclude declined transactions
-AND transaction.declined = 0
-ORDER BY amount DESC;
+AND t.declined = 0
+ORDER BY t.amount DESC;
 
  /* Exercici 2
 Necessitem optimitzar l'assignació dels recursos i dependrà de la capacitat operativa que es requereixi, per la qual cosa et demanen la informació sobre la quantitat
@@ -182,23 +192,19 @@ Therefore, you are asked to provide information on the number of transactions ma
 However, the human resources department is strict and wants a list of companies specifying whether they have made more than 4 transactions or fewer.
 */
 
-SELECT DISTINCT company.id as company_id, company_name, count(*) AS tranasctions_number, 
+SELECT c.id , c.company_name, count(*) AS tranasctions_number, 
 CASE 
 WHEN count(*) > 4 THEN "> 4"
 ELSE  "≤ 4"
 END AS count_transactions_not_declined
 
-FROM company
-LEFT JOIN transaction ON company.id = transaction.company_id
+FROM company c
+LEFT JOIN transaction t ON c.id = t.company_id
 -- exclude declined transactions
-WHERE transaction.declined = FALSE
-GROUP BY company.id, company_name
+WHERE t.declined = FALSE
+GROUP BY c.id
 ORDER BY tranasctions_number DESC;
 
 -- check mumber of all compnies to see if all of them are returned in the previous query
 SELECT DISTINCT company_id
 FROM transaction;
-
-
-SELECT *
-FROM transaction
